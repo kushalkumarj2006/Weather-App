@@ -7,30 +7,43 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/lucide@0.3.3/dist/lucide.min.css" rel="stylesheet">
     <style>
-        .dark-mode {
-            background-color: #2f3436;
-            color: #ffffff;
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #4caf50;
+            --accent-color: #ff9800;
+            --background-color: #f7f7f7;
+            --text-color: #212121;
+            --background-color-dark: #2c3e50;
+            --text-color-dark: #f7f7f7;
         }
-        .dark-mode .search-btn {
-            background-color: #343a40;
-            color: #ffffff;
+        .dark-mode {
+            --primary-color: #4c7dfa;
+            --secondary-color: #34c759;
+            --accent-color: #ffc107;
+            --background-color: #2c3e50;
+            --text-color: #f7f7f7;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
         }
         .label {
-            color: #ff9900;
+            color: var(--secondary-color);
         }
         .value {
             font-weight: bold;
-            color: #3498db;
+            color: var(--primary-color);
         }
         .unit {
             font-weight: bold;
-            color: #3498db;
+            color: var(--primary-color);
         }
         .weather-data p {
-            color: #ff9900;
+            color: var(--secondary-color);
         }
         .weather-data p span {
-            color: #3498db;
+            color: var(--primary-color);
         }
         .weather-data p span.unit {
             font-weight: bold;
@@ -40,54 +53,118 @@
         }
         .bold-blue {
             font-weight: bold;
-            color: #3498db;
+            color: var(--primary-color);
         }
         #location-header {
             text-align: center;
             margin-bottom: 20px;
         }
+        .border-app {
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            background-color: var(--background-color);
+        }
+        .border-app.dark-mode {
+            border: 2px solid var(--primary-color);
+            background-color: var(--background-color-dark);
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .theme-toggle .light-circle {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #87ceeb;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .theme-toggle .dark-circle {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #333;
+            display: inline-block;
+        }
+        .dark-mode .theme-toggle .light-circle {
+            display: none;
+        }
+        .dark-mode .theme-toggle .dark-circle {
+            display: inline-block;
+        }
+        .light-mode .theme-toggle .light-circle {
+            display: inline-block;
+        }
+        .light-mode .theme-toggle .dark-circle {
+            display: none;
+        }
+        .dark-mode input {
+            background-color: var(--background-color-dark);
+            color: var(--text-color-dark);
+        }
+        .dark-mode #location-header, .dark-mode .weather-data {
+            color: var(--text-color-dark);
+        }
+        .dark-mode .value {
+            color: var(--primary-color);
+        }
+        .dark-mode .unit {
+            color: var(--primary-color);
+        }
+        .bold-text {
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-blue-100 dark-mode">
-    <div class="w-full max-w-2xl mx-auto mt-8 p-4 bg-orange-50 rounded-lg shadow-md dark-mode">
-        <div class="flex items-center space-x-2 mb-4">
-            <input type="text" id="city" class="w-full p-2 pl-10 text-sm text-blue-600 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 dark-mode" placeholder="Enter city name">
-            <button id="search-btn" class="search-btn bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg dark-mode">Search</button>
+<body>
+    <div class="w-full max-w-2xl mx-auto mt-8 p-4 border-app bg-white rounded-lg shadow-md">
+        <h1 class="text-2xl text-center mb-4 bold-text">Weather App</h1>
+        <div class="theme-toggle">
+            <div class="light-circle"></div>
+            <div class="dark-circle" style="display: none;"></div>
+        </div>
+        <div class="flex items-center space-x-2 mb-4 relative">
+            <input type="text" id="city" class="w-full p-2 pl-10 text-sm text-gray-200 border border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-0d6efd" placeholder="Enter city name">
+            <img src="https://cdn-icons-png.flaticon.com/256/14910/14910683.png" alt="Search Icon" class="absolute right-4 w-8 h-8" id="search-icon">
         </div>
         <div id="location-header" class="hidden">
-            <h2 id="city-name" class="text-2xl font-semibold mb-2 text-center text-blue-600 dark-mode"></h2>
-            <p id="coordinates" class="text-lg font-medium text-center text-blue-600 dark-mode"></p>
+            <h2 id="city-name" class="text-2xl font-semibold mb-2 text-center bold-text"></h2>
+            <p id="coordinates" class="text-lg font-medium text-center text-gray-400 bold-text"></p>
         </div>
-        <div id="error-modal" class="hidden fixed inset-0 bg-blue-500 bg-opacity-75 flex justify-center items-center">
-            <div class="bg-orange-50 rounded-lg shadow-md p-4 w-80 dark-mode">
-                <p id="error-message" class="text-red-500 text-center dark-mode"></p>
-                <button id="close-modal" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg mt-4 dark-mode">Close</button>
+        <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 w-80">
+                <p id="error-message" class="text-red-500 text-center bold-text"></p>
+                <button id="close-modal" class="bg-0d6efd hover:bg-0d6efd text-white font-bold py-2 px-4 rounded-lg mt-4">Close</button>
             </div>
         </div>
         <div id="loading" class="hidden flex justify-center items-center">
-            <div class="border-t-transparent border-solid animate-spin rounded-full border-orange-500 border-8 h-24 w-24 dark-mode"></div>
+            <div class="border-t-transparent border-solid animate-spin rounded-full border-0d6efd border-8 h-24 w-24"></div>
         </div>
-        <div id="weather-data" class="weather-data hidden p-4 rounded-lg bg-blue-50 dark-mode">
+        <div id="weather-data" class="weather-data hidden p-4 rounded-lg bg-white">
             <div class="flex items-center mb-4">
-                <img id="condition-icon" class="w-24 h-24 mr-4" src="" alt="Weather Icon">
-                <p id="condition">Condition: <span id="condition-value" class="value"></span></p>
+                <img id="condition-icon" class="w-48 h-48 mr-4" src="" alt="Weather Icon">
+                <p id="condition" class="bold-text">Condition: <span id="condition-value" class="value bold-text"></span></p>
             </div>
             <div class="mt-2 space-y-2">
-                <p id="temperature">Temperature: <span id="temperature-value" class="value"></span> <span class="unit">°C</span> <span class="bold-blue">/</span> <span id="temperature-value-f" class="value"></span> <span class="unit">°F</span></p>
-                <p id="humidity">Humidity: <span id="humidity-value" class="value"></span> <span class="unit">%</span></p>
-                <p id="wind-speed">Wind Speed: <span id="wind-speed-value" class="value"></span> <span class="unit">km/h</span></p>
-                <p id="wind-direction">Wind Direction: <span id="wind-direction-value" class="value"></span></p>
-                <p id="pressure">Pressure: <span id="pressure-value" class="value"></span> <span class="unit">hPa</span></p>
-                <p id="cloud-cover">Cloud Cover: <span id="cloud-cover-value" class="value"></span> <span class="unit">%</span></p>
-                <p id="uv-index">UV Index: <span id="uv-index-value" class="value"></span></p>
-                <p id="precipitation">Precipitation: <span id="precipitation-value" class="value"></span> <span class="unit">mm</span></p>
+                <p id="temperature" class="bold-text">Temperature: <span id="temperature-value" class="value bold-text"></span> <span class="unit bold-text">°C</span> / <span id="temperature-value-f" class="value bold-text"></span> <span class="unit bold-text">°F</span></p>
+                <p id="humidity" class="bold-text">Humidity: <span id="humidity-value" class="value bold-text"></span> <span class="unit bold-text">%</span></p>
+                <p id="wind-speed" class="bold-text">Wind Speed: <span id="wind-speed-value" class="value bold-text"></span> <span class="unit bold-text">km/h</span></p>
+                <p id="wind-direction" class="bold-text">Wind Direction: <span id="wind-direction-value" class="value bold-text"></span></p>
+                <p id="pressure" class="bold-text">Pressure: <span id="pressure-value" class="value bold-text"></span> <span class="unit bold-text">hPa</span></p>
+                <p id="cloud-cover" class="bold-text">Cloud Cover: <span id="cloud-cover-value" class="value bold-text"></span> <span class="unit bold-text">%</span></p>
+                <p id="uv-index" class="bold-text">UV Index: <span id="uv-index-value" class="value bold-text"></span></p>
+                <p id="precipitation" class="bold-text">Precipitation: <span id="precipitation-value" class="value bold-text"></span> <span class="unit bold-text">mm</span></p>
+                <p id="feels-like" class="bold-text">Feels Like: <span id="feels-like-value" class="value bold-text"></span> <span class="unit bold-text">°C</span> / <span id="feels-like-value-f" class="value bold-text"></span> <span class="unit bold-text">°F</span></p>
+                <p id="wind-gust" class="bold-text">Wind Gust: <span id="wind-gust-value" class="value bold-text"></span> <span class="unit bold-text">km/h</span></p>
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/axios@0.24.0/dist/axios.min.js"></script>
     <script>
-        const searchBtn = document.getElementById('search-btn');
+        const API_KEY = 'fd092760ff0f4530a7191542253001'; 
         const cityInput = document.getElementById('city');
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
@@ -106,10 +183,25 @@
         const cloudCoverValueDiv = document.getElementById('cloud-cover-value');
         const uvIndexValueDiv = document.getElementById('uv-index-value');
         const precipitationValueDiv = document.getElementById('precipitation-value');
+        const feelsLikeValueDiv = document.getElementById('feels-like-value');
+        const feelsLikeValueFDiv = document.getElementById('feels-like-value-f');
+        const windGustValueDiv = document.getElementById('wind-gust-value');
         const locationHeaderDiv = document.getElementById('location-header');
         const coordinatesDiv = document.getElementById('coordinates');
+        const searchIcon = document.getElementById('search-icon');
+        const themeToggle = document.querySelector('.theme-toggle');
+        let isDarkMode = false;
 
-        searchBtn.addEventListener('click', async () => {
+        async function getWeatherData(city) {
+            try {
+                const response = await axios.get(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}&aqi=no`);
+                return response.data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        searchIcon.addEventListener('click', async () => {
             const city = cityInput.value.trim();
             if (!city) {
                 errorModal.classList.remove('hidden');
@@ -119,8 +211,7 @@
             errorModal.classList.add('hidden');
             loadingDiv.classList.remove('hidden');
             try {
-                const response = await axios.get(`https://api.weatherapi.com/v1/current.json?key=fd092760ff0f4530a7191542253001&q=${city}&aqi=no`);
-                const data = response.data;
+                const data = await getWeatherData(city);
                 if (data.error) {
                     errorModal.classList.remove('hidden');
                     errorMessage.innerText = data.error.message;
@@ -141,6 +232,20 @@
                     cloudCoverValueDiv.innerText = data.current.cloud;
                     uvIndexValueDiv.innerText = data.current.uv;
                     precipitationValueDiv.innerText = data.current.precip_mm;
+                    feelsLikeValueDiv.innerText = data.current.feelslike_c;
+                    feelsLikeValueFDiv.innerText = data.current.feelslike_f;
+                    windGustValueDiv.innerText = data.current.gust_kph;
+                    if (isDarkMode) {
+                        document.querySelector('.border-app').classList.add('dark-mode');
+                        weatherDataDiv.classList.add('dark-mode');
+                        weatherDataDiv.style.backgroundColor = 'var(--background-color-dark)';
+                        weatherDataDiv.style.color = 'var(--text-color-dark)';
+                    } else {
+                        document.querySelector('.border-app').classList.remove('dark-mode');
+                        weatherDataDiv.classList.remove('dark-mode');
+                        weatherDataDiv.style.backgroundColor = 'var(--background-color)';
+                        weatherDataDiv.style.color = 'var(--text-color)';
+                    }
                 }
             } catch (error) {
                 errorModal.classList.remove('hidden');
@@ -153,6 +258,28 @@
         closeModal.addEventListener('click', () => {
             errorModal.classList.add('hidden');
         });
+
+        themeToggle.addEventListener('click', () => {
+            if (!isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.border-app').classList.add('dark-mode');
+                weatherDataDiv.classList.add('dark-mode');
+                weatherDataDiv.style.backgroundColor = 'var(--background-color-dark)';
+                weatherDataDiv.style.color = 'var(--text-color-dark)';
+                themeToggle.querySelector('.dark-circle').style.display = 'inline-block';
+                themeToggle.querySelector('.light-circle').style.display = 'none';
+                isDarkMode = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.querySelector('.border-app').classList.remove('dark-mode');
+                weatherDataDiv.classList.remove('dark-mode');
+                weatherDataDiv.style.backgroundColor = 'var(--background-color)';
+                weatherDataDiv.style.color = 'var(--text-color)';
+                themeToggle.querySelector('.light-circle').style.display = 'inline-block';
+                themeToggle.querySelector('.dark-circle').style.display = 'none';
+                isDarkMode = false;
+            }
+        });
     </script>
 </body>
-</html>
+    </html>
