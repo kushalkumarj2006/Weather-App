@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/lucide@0.3.3/dist/lucide.min.css" rel="stylesheet">
+    <style>
+        .dark-mode {
+            background-color: #2f3436;
+            color: #ffffff;
+        }
+        .dark-mode .search-btn {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        .label {
+            color: #ff9900;
+        }
+        .value {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .unit {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .weather-data p {
+            color: #ff9900;
+        }
+        .weather-data p span {
+            color: #3498db;
+        }
+        .weather-data p span.unit {
+            font-weight: bold;
+        }
+        .weather-data p span:not(.unit) {
+            font-weight: bold;
+        }
+        .bold-blue {
+            font-weight: bold;
+            color: #3498db;
+        }
+        #location-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="bg-blue-100 dark-mode">
+    <div class="w-full max-w-2xl mx-auto mt-8 p-4 bg-orange-50 rounded-lg shadow-md dark-mode">
+        <div class="flex items-center space-x-2 mb-4">
+            <input type="text" id="city" class="w-full p-2 pl-10 text-sm text-blue-600 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 dark-mode" placeholder="Enter city name">
+            <button id="search-btn" class="search-btn bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg dark-mode">Search</button>
+        </div>
+        <div id="location-header" class="hidden">
+            <h2 id="city-name" class="text-2xl font-semibold mb-2 text-center text-blue-600 dark-mode"></h2>
+            <p id="coordinates" class="text-lg font-medium text-center text-blue-600 dark-mode"></p>
+        </div>
+        <div id="error-modal" class="hidden fixed inset-0 bg-blue-500 bg-opacity-75 flex justify-center items-center">
+            <div class="bg-orange-50 rounded-lg shadow-md p-4 w-80 dark-mode">
+                <p id="error-message" class="text-red-500 text-center dark-mode"></p>
+                <button id="close-modal" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg mt-4 dark-mode">Close</button>
+            </div>
+        </div>
+        <div id="loading" class="hidden flex justify-center items-center">
+            <div class="border-t-transparent border-solid animate-spin rounded-full border-orange-500 border-8 h-24 w-24 dark-mode"></div>
+        </div>
+        <div id="weather-data" class="weather-data hidden p-4 rounded-lg bg-blue-50 dark-mode">
+            <div class="flex items-center mb-4">
+                <img id="condition-icon" class="w-24 h-24 mr-4" src="" alt="Weather Icon">
+                <p id="condition">Condition: <span id="condition-value" class="value"></span></p>
+            </div>
+            <div class="mt-2 space-y-2">
+                <p id="temperature">Temperature: <span id="temperature-value" class="value"></span> <span class="unit">°C</span> <span class="bold-blue">/</span> <span id="temperature-value-f" class="value"></span> <span class="unit">°F</span></p>
+                <p id="humidity">Humidity: <span id="humidity-value" class="value"></span> <span class="unit">%</span></p>
+                <p id="wind-speed">Wind Speed: <span id="wind-speed-value" class="value"></span> <span class="unit">km/h</span></p>
+                <p id="wind-direction">Wind Direction: <span id="wind-direction-value" class="value"></span></p>
+                <p id="pressure">Pressure: <span id="pressure-value" class="value"></span> <span class="unit">hPa</span></p>
+                <p id="cloud-cover">Cloud Cover: <span id="cloud-cover-value" class="value"></span> <span class="unit">%</span></p>
+                <p id="uv-index">UV Index: <span id="uv-index-value" class="value"></span></p>
+                <p id="precipitation">Precipitation: <span id="precipitation-value" class="value"></span> <span class="unit">mm</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.24.0/dist/axios.min.js"></script>
+    <script>
+        const searchBtn = document.getElementById('search-btn');
+        const cityInput = document.getElementById('city');
+        const errorModal = document.getElementById('error-modal');
+        const errorMessage = document.getElementById('error-message');
+        const closeModal = document.getElementById('close-modal');
+        const loadingDiv = document.getElementById('loading');
+        const weatherDataDiv = document.getElementById('weather-data');
+        const cityNameDiv = document.getElementById('city-name');
+        const conditionIconDiv = document.getElementById('condition-icon');
+        const conditionValueDiv = document.getElementById('condition-value');
+        const temperatureValueDiv = document.getElementById('temperature-value');
+        const temperatureValueFDiv = document.getElementById('temperature-value-f');
+        const humidityValueDiv = document.getElementById('humidity-value');
+        const windSpeedValueDiv = document.getElementById('wind-speed-value');
+        const windDirectionValueDiv = document.getElementById('wind-direction-value');
+        const pressureValueDiv = document.getElementById('pressure-value');
+        const cloudCoverValueDiv = document.getElementById('cloud-cover-value');
+        const uvIndexValueDiv = document.getElementById('uv-index-value');
+        const precipitationValueDiv = document.getElementById('precipitation-value');
+        const locationHeaderDiv = document.getElementById('location-header');
+        const coordinatesDiv = document.getElementById('coordinates');
+
+        searchBtn.addEventListener('click', async () => {
+            const city = cityInput.value.trim();
+            if (!city) {
+                errorModal.classList.remove('hidden');
+                errorMessage.innerText = 'Please enter a city name';
+                return;
+            }
+            errorModal.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            try {
+                const response = await axios.get(`https://api.weatherapi.com/v1/current.json?key=fd092760ff0f4530a7191542253001&q=${city}&aqi=no`);
+                const data = response.data;
+                if (data.error) {
+                    errorModal.classList.remove('hidden');
+                    errorMessage.innerText = data.error.message;
+                } else {
+                    weatherDataDiv.classList.remove('hidden');
+                    locationHeaderDiv.classList.remove('hidden');
+                    loadingDiv.classList.add('hidden');
+                    cityNameDiv.innerText = `Weather in ${data.location.name}, ${data.location.region}, ${data.location.country}`;
+                    coordinatesDiv.innerText = `Coordinates: ${data.location.lat} °N, ${data.location.lon} °E`;
+                    conditionIconDiv.src = `https:${data.current.condition.icon}`;
+                    conditionValueDiv.innerText = data.current.condition.text;
+                    temperatureValueDiv.innerText = data.current.temp_c;
+                    temperatureValueFDiv.innerText = data.current.temp_f;
+                    humidityValueDiv.innerText = data.current.humidity;
+                    windSpeedValueDiv.innerText = data.current.wind_kph;
+                    windDirectionValueDiv.innerText = data.current.wind_dir;
+                    pressureValueDiv.innerText = data.current.pressure_mb;
+                    cloudCoverValueDiv.innerText = data.current.cloud;
+                    uvIndexValueDiv.innerText = data.current.uv;
+                    precipitationValueDiv.innerText = data.current.precip_mm;
+                }
+            } catch (error) {
+                errorModal.classList.remove('hidden');
+                errorMessage.innerText = 'Failed to fetch weather data';
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        });
+
+        closeModal.addEventListener('click', () => {
+            errorModal.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
